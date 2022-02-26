@@ -50,6 +50,7 @@ const HomePage = () => {
       const parsedTasks = JSON.parse(savedList || "{}");
       setInitialState(parsedTasks);
     }
+    // eslint-disable-next-line
   }, []);
 
   return (
