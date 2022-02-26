@@ -52,6 +52,10 @@ const TaskContextProvider: React.FC = (props) => {
 
   function addTask(task: StartupTaskType) {
     setTaskListContext((taskList: StartupTaskType[]) => {
+      window.localStorage.setItem(
+        "taskList",
+        JSON.stringify(taskList.concat(task))
+      );
       return taskList.concat(task);
     });
   }
