@@ -1,38 +1,46 @@
-import { Checkbox, Form } from "antd";
-import React, { useEffect, useState } from "react";
-import { StartupTaskType } from "../lib/types/task.type";
+import { Button, Form, Input } from "antd";
+import { v4 as uuid } from "uuid";
+import React, { SetStateAction, useEffect } from "react";
+import { StartupTaskType, TaskStatus } from "../lib/types/task.type";
 
 interface ITaskInput {
-  taskList: StartupTaskType[];
+  addTask: (startupTask: StartupTaskType) => void;
 }
 const TaskInput: React.FC<ITaskInput> = (props) => {
   const [TaskForm] = Form.useForm();
-  const { taskList } = props;
-  useEffect(() => {}, []);
+  const { addTask } = props;
+
+  const tailLayout = {
+    wrapperCol: { offset: 4, span: 20 },
+  };
+
+  const handleFinish = (values: any) => {
+    const _newMileStone: StartupTaskType = {
+      id: uuid(),
+      title: values.milestone,
+      sub_tasks: [],
+      status: TaskStatus.ACTIVE,
+    };
+    addTask(_newMileStone);
+    TaskForm.resetFields();
+  };
 
   return (
-    <div>
-      {taskList?.map((task) => {
-        return (
-          <div key={task.id}>
-            <h1>{task.title}</h1>
-            <Form.List name="sub_tasks" initialValue={task.sub_tasks}>
-              {(fields) => {
-                return (
-                  <div>
-                    {fields.map((field) => (
-                      <Form.Item {...field}>
-                        <Checkbox />
-                      </Form.Item>
-                    ))}
-                  </div>
-                );
-              }}
-            </Form.List>
-          </div>
-        );
-      })}
-    </div>
+    <Form form={TaskForm} onFinish={handleFinish}>
+      <div className="flex space-x-5">
+        <Form.Item
+          name="milestone"
+          rules={[{ required: true, message: "Please enter a milestone" }]}
+        >
+          <Input  placeholder="E.x Startup Foundation" />
+        </Form.Item>
+        <Form.Item>
+          <Button type="primary" htmlType="submit">
+            Add
+          </Button>
+        </Form.Item>
+      </div>
+    </Form>
   );
 };
 
