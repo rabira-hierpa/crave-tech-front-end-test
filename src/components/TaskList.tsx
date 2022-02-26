@@ -3,7 +3,7 @@ import { useForm } from "antd/lib/form/Form";
 import React, { useState } from "react";
 import { StartupTaskType, SubTaskType } from "../lib/types/task.type";
 import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
-
+import { v4 as uuid } from "uuid";
 interface ITaskList {
   taskList: StartupTaskType[];
   addSubTask: (taskId: string, subtasks: SubTaskType[]) => void;
@@ -25,7 +25,8 @@ const TaskList: React.FC<ITaskList> = (props) => {
         if (values?.subtask) {
           let updatedTask = taskList.find((task) => task.id === taskId);
           if (updatedTask) {
-            const _newSubTask = {
+            const _newSubTask:SubTaskType = {
+              id: uuid(),
               title: values?.subtask,
               isComplete: false,
             };
@@ -99,10 +100,10 @@ interface ISubTaskList {
 
 const SubTaskList: React.VFC<ISubTaskList> = ({ allSubTasks }) => {
   return (
-    <div>
+    <div className="pl-5">
       {allSubTasks?.map((subTask) => (
-        <div className="flex space-x-5">
-          <Checkbox checked={subTask.isComplete} />
+        <div key={subTask.id} className="flex space-x-5">
+          <Checkbox defaultChecked={subTask.isComplete} />
           <p className="text-md">{subTask.title}</p>
         </div>
       ))}

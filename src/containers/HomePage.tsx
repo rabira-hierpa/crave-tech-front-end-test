@@ -27,7 +27,7 @@ const HomePage = () => {
     <div className="">
       <Header />
       <div className="grid justify-items-center">
-        <div className="w-1/2 mx-96 px-10 mt-10 bg-slate-100">
+        <div className="w-1/2 mx-96 px-10 mt-10 bg-slate-100 rounded-2xl shadow-sm">
           <div className="flex flex-col p-10">
             <TaskInput addTask={addTask} />
             <TaskList taskList={allTasks} addSubTask={addSubTask} />
@@ -40,7 +40,7 @@ const HomePage = () => {
 
 const Header: React.VFC = () => {
   return (
-    <nav className="bg-yellow-400 py-5 shadow-md">
+    <nav className="bg-yellow-400 py-2 shadow-md">
       <h1 className="text-center text-3xl font-bold">
         Startup Progress Tracker
       </h1>
