@@ -1,11 +1,12 @@
 import React from "react";
-import Home from "./containers/Home";
+import HomePage from "./containers/HomePage";
+import AppLayout from "./containers/AppLayout";
 
 function App() {
   return (
-    <div className="w-1/2 h-full flex flex-col justify-center space-x-5">
-      <Home />
-    </div>
+    <AppLayout>
+      <HomePage />
+    </AppLayout>
   );
 }
 
