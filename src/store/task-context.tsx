@@ -44,7 +44,7 @@ interface ITaskContext {
 
 export const TaskContext = createContext<ITaskContext>({
   allTasks: [],
-  allTasksCompleted: undefined,
+  allTasksCompleted: false,
   unlockNextStage: (startupProgress: StartupTaskType[]) => {},
   addTask: (startupTask: StartupTaskType) => {},
   addSubTask: (taskId: string, subtasks: SubTaskType[]) => {},
@@ -78,7 +78,7 @@ const TaskContextProvider: React.FC = (props) => {
         return taskList.concat(task);
       });
     }
-    setAllTasksCompleted(false)
+    setAllTasksCompleted(false);
   }
 
   function addSubTask(taskId: string, subtasks: SubTaskType[]) {
@@ -118,7 +118,7 @@ const TaskContextProvider: React.FC = (props) => {
           progress.status = TaskStatus.COMPLETED;
           setTaskListContext(_startupProgress);
           writeToLocalStorage(_startupProgress);
-          setAllTasksCompleted(true)
+          setAllTasksCompleted(true);
           break;
         }
       }
