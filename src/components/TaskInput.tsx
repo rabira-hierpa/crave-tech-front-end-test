@@ -1,6 +1,6 @@
 import { Button, Form, Input } from "antd";
 import { v4 as uuid } from "uuid";
-import React, { SetStateAction, useEffect } from "react";
+import React from "react";
 import { StartupTaskType, TaskStatus } from "../lib/types/task.type";
 
 interface ITaskInput {
@@ -9,10 +9,6 @@ interface ITaskInput {
 const TaskInput: React.FC<ITaskInput> = (props) => {
   const [TaskForm] = Form.useForm();
   const { addTask } = props;
-
-  const tailLayout = {
-    wrapperCol: { offset: 4, span: 20 },
-  };
 
   const handleFinish = (values: any) => {
     const _newMileStone: StartupTaskType = {
