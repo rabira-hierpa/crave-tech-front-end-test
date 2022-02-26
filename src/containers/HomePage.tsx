@@ -30,7 +30,7 @@ const HomePage = () => {
         <div className="w-1/2 mx-96 px-10 mt-10 bg-slate-100 rounded-2xl shadow-sm">
           <div className="flex flex-col p-10">
             <TaskInput addTask={addTask} />
-            <TaskList taskList={allTasks} addSubTask={addSubTask} />
+            <TaskList  />
           </div>
         </div>
       </div>
