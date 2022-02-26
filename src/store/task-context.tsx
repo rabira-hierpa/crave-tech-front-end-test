@@ -14,7 +14,7 @@ import { v4 as UUID } from "uuid";
 const initialState: StartupTaskType[] = [
   {
     id: UUID(),
-    title: "My Foundation",
+    title: "Foundation",
     sub_tasks: [],
     status: TaskStatus.ACTIVE,
   },
@@ -34,6 +34,7 @@ const initialState: StartupTaskType[] = [
 
 interface ITaskContext {
   allTasks: StartupTaskType[];
+  allTasksCompleted: boolean;
   unlockNextStage: (param: StartupTaskType[]) => void;
   addTask: (param: StartupTaskType) => void;
   addSubTask: (taskId: string, subtasks: SubTaskType[]) => void;
@@ -43,6 +44,7 @@ interface ITaskContext {
 
 export const TaskContext = createContext<ITaskContext>({
   allTasks: [],
+  allTasksCompleted: undefined,
   unlockNextStage: (startupProgress: StartupTaskType[]) => {},
   addTask: (startupTask: StartupTaskType) => {},
   addSubTask: (taskId: string, subtasks: SubTaskType[]) => {},
@@ -53,6 +55,7 @@ export const TaskContext = createContext<ITaskContext>({
 const TaskContextProvider: React.FC = (props) => {
   const [taskListContext, setTaskListContext] =
     useState<StartupTaskType[]>(initialState);
+  const [allTasksCompleted, setAllTasksCompleted] = useState<boolean>(false);
 
   function checkActiveTask(): boolean {
     return taskListContext.some((task) => task.status === TaskStatus.ACTIVE);
@@ -75,6 +78,7 @@ const TaskContextProvider: React.FC = (props) => {
         return taskList.concat(task);
       });
     }
+    setAllTasksCompleted(false)
   }
 
   function addSubTask(taskId: string, subtasks: SubTaskType[]) {
@@ -114,6 +118,7 @@ const TaskContextProvider: React.FC = (props) => {
           progress.status = TaskStatus.COMPLETED;
           setTaskListContext(_startupProgress);
           writeToLocalStorage(_startupProgress);
+          setAllTasksCompleted(true)
           break;
         }
       }
@@ -127,6 +132,7 @@ const TaskContextProvider: React.FC = (props) => {
   const _taskContext = {
     addTask: addTask,
     addSubTask: addSubTask,
+    allTasksCompleted: allTasksCompleted,
     allTasks: taskListContext,
     findTaskById: findTaskById,
     unlockNextStage: unlockNextStage,

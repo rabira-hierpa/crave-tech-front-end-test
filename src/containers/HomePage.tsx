@@ -1,11 +1,42 @@
-import React, { useContext, useEffect } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import TaskInput from "../components/TaskInput";
 import TaskList from "../components/TaskList";
 import { TaskContext } from "../store/task-context";
 
+const AlertMessage: React.FC = () => {
+  const { allTasksCompleted } = useContext(TaskContext);
+  const [alertMessage, setAlertMessage] = useState<any>({});
+
+  const getFact = async () => {
+    const response = await fetch("https://uselessfacts.jsph.pl/random.json")
+      .then((res: any) => {
+        return res.json();
+      })
+      .then((data: any) => {
+        return data;
+      });
+    setAlertMessage(response);
+  };
+  useEffect(() => {
+    getFact();
+  }, [allTasksCompleted]);
+
+  return (
+    <div className="flex text-xl font-semibold ">
+      {allTasksCompleted ? (
+        <div className="bg-slate-50 p-10 w-full">
+          <div className="flex flex-col text-center ">
+            <div className="text-yellow-400">{alertMessage?.text}</div>
+            <div className="items-end italic">{alertMessage?.source}</div>
+          </div>
+        </div>
+      ) : null}
+    </div>
+  );
+};
+
 const HomePage = () => {
-  const { allTasks, addTask, addSubTask, setInitialState } =
-    useContext(TaskContext);
+  const { allTasks, addTask, setInitialState } = useContext(TaskContext);
 
   useEffect(() => {
     const savedList = window.localStorage.getItem("taskList");
@@ -21,16 +52,15 @@ const HomePage = () => {
     }
   }, []);
 
-  
-  
   return (
-    <div className="">
+    <div>
       <Header />
+      <AlertMessage />
       <div className="grid justify-items-center">
         <div className="w-1/2 mx-96 px-10 mt-10 bg-slate-100 rounded-2xl shadow-sm">
           <div className="flex flex-col p-10">
             <TaskInput addTask={addTask} />
-            <TaskList  />
+            <TaskList />
           </div>
         </div>
       </div>
