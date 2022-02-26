@@ -9,23 +9,23 @@ import {
   SubTaskType,
   TaskStatus,
 } from "../lib/types/task.type";
-import { v4 as uuidv4 } from "uuid";
+import { v4 as UUID } from "uuid";
 
 const initialState: StartupTaskType[] = [
   {
-    id: uuidv4(),
-    title: "My Foundation",
+    id: UUID(),
+    title: "Foundation",
     sub_tasks: [],
     status: TaskStatus.ACTIVE,
   },
   {
-    id: uuidv4(),
+    id: UUID(),
     title: "Discovery",
     sub_tasks: [],
     status: TaskStatus.LOCKED,
   },
   {
-    id: uuidv4(),
+    id: UUID(),
     title: "Delivery",
     sub_tasks: [],
     status: TaskStatus.LOCKED,
@@ -34,29 +34,51 @@ const initialState: StartupTaskType[] = [
 
 interface ITaskContext {
   allTasks: StartupTaskType[];
+  allTasksCompleted: boolean;
   unlockNextStage: (param: StartupTaskType[]) => void;
   addTask: (param: StartupTaskType) => void;
-  addSubTask: (taskId: string, subtasks: SubTaskType[]) => void,
+  addSubTask: (taskId: string, subtasks: SubTaskType[]) => void;
+  findTaskById: (taskId: string) => StartupTaskType | undefined;
   setInitialState: Dispatch<SetStateAction<StartupTaskType[]>>;
 }
 
 export const TaskContext = createContext<ITaskContext>({
   allTasks: [],
+  allTasksCompleted: false,
   unlockNextStage: (startupProgress: StartupTaskType[]) => {},
   addTask: (startupTask: StartupTaskType) => {},
-  addSubTask: (taskId: string, subtasks: SubTaskType[]) => {} ,
+  addSubTask: (taskId: string, subtasks: SubTaskType[]) => {},
+  findTaskById: (taskId: string) => undefined,
   setInitialState: () => {},
 });
 
 const TaskContextProvider: React.FC = (props) => {
   const [taskListContext, setTaskListContext] =
     useState<StartupTaskType[]>(initialState);
+  const [allTasksCompleted, setAllTasksCompleted] = useState<boolean>(false);
+
+  function checkActiveTask(): boolean {
+    return taskListContext.some((task) => task.status === TaskStatus.ACTIVE);
+  }
+
+  function findTaskById(taskId: string): StartupTaskType | undefined {
+    return taskListContext.find((task) => task.id === taskId);
+  }
 
   function addTask(task: StartupTaskType) {
-    setTaskListContext((taskList: StartupTaskType[]) => {
-      writeToLocalStorage(taskList.concat(task));
-      return taskList.concat(task);
-    });
+    if (!checkActiveTask()) {
+      setTaskListContext((taskList: StartupTaskType[]) => {
+        writeToLocalStorage(taskList.concat(task));
+        return taskList.concat(task);
+      });
+    } else {
+      task.status = TaskStatus.LOCKED;
+      setTaskListContext((taskList: StartupTaskType[]) => {
+        writeToLocalStorage(taskList.concat(task));
+        return taskList.concat(task);
+      });
+    }
+    setAllTasksCompleted(false);
   }
 
   function addSubTask(taskId: string, subtasks: SubTaskType[]) {
@@ -68,20 +90,35 @@ const TaskContextProvider: React.FC = (props) => {
       const updatedTask = taskListContext.map((_task: StartupTaskType) => {
         return _task.id !== taskId ? _task : (_task = task);
       });
-      writeToLocalStorage(updatedTask);
+      unlockNextStage(updatedTask);
     }
   }
 
   const unlockNextStage = (_startupProgress: StartupTaskType[]): void => {
-    for (let i = 0; i < _startupProgress.length; i++) {
-      const progress: StartupTaskType = _startupProgress[i];
-      if (progress.status === TaskStatus.ACTIVE) {
+    let nextStep = 0;
+    for (const progress of _startupProgress) {
+      if (progress.status === TaskStatus.ACTIVE && progress.sub_tasks.length) {
         const allTasksComplete: boolean = progress.sub_tasks.some(
           (item: SubTaskType) => item.isComplete === false
         );
-        if (!allTasksComplete) {
+        if (
+          !allTasksComplete &&
+          _startupProgress.indexOf(progress) + 1 < _startupProgress.length
+        ) {
           progress.status = TaskStatus.COMPLETED;
-          _startupProgress[i + 1].status = TaskStatus.ACTIVE;
+          nextStep = _startupProgress.indexOf(progress) + 1;
+          _startupProgress[nextStep].status = TaskStatus.ACTIVE;
+          setTaskListContext(_startupProgress);
+          writeToLocalStorage(_startupProgress);
+          break;
+        } else if (
+          !allTasksComplete &&
+          _startupProgress.indexOf(progress) === _startupProgress.length - 1
+        ) {
+          progress.status = TaskStatus.COMPLETED;
+          setTaskListContext(_startupProgress);
+          writeToLocalStorage(_startupProgress);
+          setAllTasksCompleted(true);
           break;
         }
       }
@@ -95,7 +132,9 @@ const TaskContextProvider: React.FC = (props) => {
   const _taskContext = {
     addTask: addTask,
     addSubTask: addSubTask,
+    allTasksCompleted: allTasksCompleted,
     allTasks: taskListContext,
+    findTaskById: findTaskById,
     unlockNextStage: unlockNextStage,
     setInitialState: setTaskListContext,
   };
