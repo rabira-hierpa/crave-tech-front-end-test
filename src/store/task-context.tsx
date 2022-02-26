@@ -36,6 +36,7 @@ interface ITaskContext {
   allTasks: StartupTaskType[];
   unlockNextStage: (param: StartupTaskType[]) => void;
   addTask: (param: StartupTaskType) => void;
+  addSubTask: (taskId: string, subtasks: SubTaskType[]) => void,
   setInitialState: Dispatch<SetStateAction<StartupTaskType[]>>;
 }
 
@@ -43,6 +44,7 @@ export const TaskContext = createContext<ITaskContext>({
   allTasks: [],
   unlockNextStage: (startupProgress: StartupTaskType[]) => {},
   addTask: (startupTask: StartupTaskType) => {},
+  addSubTask: (taskId: string, subtasks: SubTaskType[]) => {} ,
   setInitialState: () => {},
 });
 
@@ -52,12 +54,22 @@ const TaskContextProvider: React.FC = (props) => {
 
   function addTask(task: StartupTaskType) {
     setTaskListContext((taskList: StartupTaskType[]) => {
-      window.localStorage.setItem(
-        "taskList",
-        JSON.stringify(taskList.concat(task))
-      );
+      writeToLocalStorage(taskList.concat(task));
       return taskList.concat(task);
     });
+  }
+
+  function addSubTask(taskId: string, subtasks: SubTaskType[]) {
+    const task = taskListContext.find(
+      (_task: StartupTaskType) => _task.id === taskId
+    );
+    if (task) {
+      task.sub_tasks = subtasks;
+      const updatedTask = taskListContext.map((_task: StartupTaskType) => {
+        return _task.id !== taskId ? _task : (_task = task);
+      });
+      writeToLocalStorage(updatedTask);
+    }
   }
 
   const unlockNextStage = (_startupProgress: StartupTaskType[]): void => {
@@ -76,8 +88,13 @@ const TaskContextProvider: React.FC = (props) => {
     }
   };
 
+  const writeToLocalStorage = (data: StartupTaskType[]) => {
+    window.localStorage.setItem("taskList", JSON.stringify(data));
+  };
+
   const _taskContext = {
     addTask: addTask,
+    addSubTask: addSubTask,
     allTasks: taskListContext,
     unlockNextStage: unlockNextStage,
     setInitialState: setTaskListContext,

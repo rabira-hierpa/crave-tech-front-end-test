@@ -1,33 +1,111 @@
-import { Form, Checkbox } from "antd";
-import React from "react";
-import { StartupTaskType } from "../lib/types/task.type";
+import { Form, Checkbox, Input, Button } from "antd";
+import { useForm } from "antd/lib/form/Form";
+import React, { useState } from "react";
+import { StartupTaskType, SubTaskType } from "../lib/types/task.type";
+import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
+
 interface ITaskList {
   taskList: StartupTaskType[];
+  addSubTask: (taskId: string, subtasks: SubTaskType[]) => void;
 }
 const TaskList: React.FC<ITaskList> = (props) => {
-  const { taskList } = props;
+  const [SubTaskForm] = useForm();
+  const { taskList, addSubTask } = props;
+  const [selectedTask, setSelectedTask] = useState<string>();
+  const [toggleSubTaskForm, setToggleSubTaskForm] = useState<boolean>(false);
+
+  const handleAddSubTask = (taskId: string) => {
+    const { validateFields } = SubTaskForm;
+    console.log({ taskId });
+    setSelectedTask(taskId);
+    setToggleSubTaskForm(true);
+
+    try {
+      validateFields().then((values) => {
+        if (values?.subtask) {
+          let updatedTask = taskList.find((task) => task.id === taskId);
+          if (updatedTask) {
+            const _newSubTask = {
+              title: values?.subtask,
+              isComplete: false,
+            };
+            updatedTask?.sub_tasks.push(_newSubTask);
+            const updatedSubTask = updatedTask.sub_tasks;
+            addSubTask(taskId, updatedSubTask);
+            setToggleSubTaskForm(false);
+            setSelectedTask("");
+          }
+        }
+      });
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  const handleRemoveInputField = (): void => {
+    setToggleSubTaskForm(false);
+  };
+
   return (
     <div>
       {taskList?.map((task) => {
         return (
           <div key={task.id}>
-            <h1>{task.title}</h1>
-            <Form.List name="sub_tasks" initialValue={task.sub_tasks}>
-              {(fields) => {
-                return (
-                  <div>
-                    {fields.map((field) => (
-                      <Form.Item {...field}>
-                        <Checkbox />
-                      </Form.Item>
-                    ))}
-                  </div>
-                );
-              }}
-            </Form.List>
+            <div className="">
+              <div className="flex justify-between">
+                <h1 className="text-xl font-semibold">{task.title}</h1>
+                <Button
+                  type="dashed"
+                  onClick={() => handleAddSubTask(task.id)}
+                  style={{ width: "10%" }}
+                  icon={<PlusOutlined />}
+                />
+              </div>
+              {task.id === selectedTask && toggleSubTaskForm ? (
+                <Form
+                  form={SubTaskForm}
+                  onFinish={() => handleAddSubTask(task.id)}
+                >
+                  <Form.Item
+                    name="subtask"
+                    rules={[
+                      { required: true, message: "Please enter a milestone" },
+                    ]}
+                  >
+                    <div className="flex p-2 space-x-2">
+                      <Input placeholder="E.g setup virtual office" />
+                      <Button
+                        type="dashed"
+                        onClick={handleRemoveInputField}
+                        style={{ width: "10%" }}
+                        icon={<MinusCircleOutlined />}
+                      />
+                    </div>
+                  </Form.Item>
+                </Form>
+              ) : null}
+              <SubTaskList allSubTasks={task.sub_tasks} />
+            </div>
           </div>
         );
       })}
+    </div>
+  );
+};
+
+interface ISubTaskList {
+  allSubTasks: SubTaskType[];
+}
+
+const SubTaskList: React.VFC<ISubTaskList> = ({ allSubTasks }) => {
+  return (
+    <div>
+      {allSubTasks?.map((subTask) => (
+        <div className="flex space-x-5">
+          <Checkbox checked={subTask.isComplete} />
+          <p className="text-md">{subTask.title}</p>
+        </div>
+      ))}
     </div>
   );
 };

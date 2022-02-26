@@ -1,12 +1,11 @@
-import { Form } from "antd";
 import React, { useContext, useEffect } from "react";
 import TaskInput from "../components/TaskInput";
 import TaskList from "../components/TaskList";
 import { TaskContext } from "../store/task-context";
 
 const HomePage = () => {
-  const [TaskForm] = Form.useForm();
-  const { allTasks,addTask, setInitialState } = useContext(TaskContext);
+  const { allTasks, addTask, addSubTask, setInitialState } =
+    useContext(TaskContext);
 
   useEffect(() => {
     const savedList = window.localStorage.getItem("taskList");
@@ -22,17 +21,19 @@ const HomePage = () => {
     }
   }, []);
 
+  
+  
   return (
     <div className="">
-      <Header/>
-        <div className="grid justify-items-center">
-          <div className="w-1/2 mx-96 px-10 mt-10 bg-slate-100">
-            <div className="flex flex-col p-10">
-              <TaskInput addTask={addTask} />
-              <TaskList taskList={allTasks}/>
-            </div>
+      <Header />
+      <div className="grid justify-items-center">
+        <div className="w-1/2 mx-96 px-10 mt-10 bg-slate-100">
+          <div className="flex flex-col p-10">
+            <TaskInput addTask={addTask} />
+            <TaskList taskList={allTasks} addSubTask={addSubTask} />
           </div>
         </div>
+      </div>
     </div>
   );
 };

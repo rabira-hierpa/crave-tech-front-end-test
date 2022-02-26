@@ -2,7 +2,7 @@
 	"configurations": [
 		{
 			"type": "pwa-chrome",
-			"name": "React Front-end",
+			"name": "http://localhost:3030",
 			"request": "launch",
 			"url": "http://localhost:3030"
 		}
