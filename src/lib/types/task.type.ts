@@ -5,11 +5,12 @@ export type SubTaskType = {
 
 export enum TaskStatus {
   ACTIVE = "active",
-  COMPELTED = "completed",
+  COMPLETED = "completed",
   LOCKED = "locked",
 }
 
 export type StartupTaskType = {
+  id: string;
   title: string;
   sub_tasks: SubTaskType[];
   status: TaskStatus;
