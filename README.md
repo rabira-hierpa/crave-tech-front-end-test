@@ -6,6 +6,12 @@ To get started simply run `npm start` and it will open up your default browser a
 
 ## Demo
 
+```
+![Demo](./demo/crave-tech-fe-test.gif)
+```
+
+## Live Demo
+
 You can preview the app at [https://startup-crave.netlify.app/](https://startup-crave.netlify.app/)
 
 ## Available Scripts
