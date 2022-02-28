@@ -7,3 +7,4 @@ test('renders learn react link', () => {
   const linkElement = screen.getByText(/learn react/i);
   expect(linkElement).toBeInTheDocument();
 });
+// TODO: write tests for adding tasks, adding subtasks, unlocking next stage and checking all subtasks complete

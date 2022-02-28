@@ -1,31 +1,36 @@
 import { Form, Checkbox, Input, Button } from "antd";
 import { useForm } from "antd/lib/form/Form";
-import React, { useState } from "react";
-import { StartupTaskType, SubTaskType } from "../lib/types/task.type";
-import { MinusCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import React, { useContext, useState } from "react";
+import { SubTaskType, TaskStatus } from "../lib/types/task.type";
+import {
+  CheckCircleFilled,
+  LockOutlined,
+  MinusCircleOutlined,
+  PlusOutlined,
+} from "@ant-design/icons";
+import { v4 as uuid } from "uuid";
+import { TaskContext } from "../store/task-context";
 
-interface ITaskList {
-  taskList: StartupTaskType[];
-  addSubTask: (taskId: string, subtasks: SubTaskType[]) => void;
-}
+interface ITaskList {}
+
 const TaskList: React.FC<ITaskList> = (props) => {
   const [SubTaskForm] = useForm();
-  const { taskList, addSubTask } = props;
+  const { allTasks, addSubTask, findTaskById } = useContext(TaskContext);
   const [selectedTask, setSelectedTask] = useState<string>();
   const [toggleSubTaskForm, setToggleSubTaskForm] = useState<boolean>(false);
 
   const handleAddSubTask = (taskId: string) => {
     const { validateFields } = SubTaskForm;
-    console.log({ taskId });
     setSelectedTask(taskId);
     setToggleSubTaskForm(true);
 
     try {
       validateFields().then((values) => {
         if (values?.subtask) {
-          let updatedTask = taskList.find((task) => task.id === taskId);
+          let updatedTask = allTasks.find((task) => task.id === taskId);
           if (updatedTask) {
-            const _newSubTask = {
+            const _newSubTask: SubTaskType = {
+              id: uuid(),
               title: values?.subtask,
               isComplete: false,
             };
@@ -46,20 +51,51 @@ const TaskList: React.FC<ITaskList> = (props) => {
     setToggleSubTaskForm(false);
   };
 
+  const handleSubTaskComplete = (taskId: string, subTaskId: string) => {
+    const _task = findTaskById(taskId);
+    if (_task) {
+      const _subTask = _task.sub_tasks.find(
+        (_subTask) => _subTask.id === subTaskId
+      );
+      if (_subTask) {
+        _subTask.isComplete = !_subTask.isComplete;
+        addSubTask(taskId, _task.sub_tasks);
+      }
+    }
+  };
+
+  const getTaskStatus = (status: TaskStatus) => {
+    switch (status) {
+      case TaskStatus.LOCKED:
+        return <LockOutlined />;
+      case TaskStatus.COMPLETED:
+        return <CheckCircleFilled />;
+      default:
+        return null;
+    }
+  };
+
   return (
     <div>
-      {taskList?.map((task) => {
+      {allTasks?.map((task) => {
         return (
           <div key={task.id}>
             <div className="">
               <div className="flex justify-between">
-                <h1 className="text-xl font-semibold">{task.title}</h1>
-                <Button
-                  type="dashed"
-                  onClick={() => handleAddSubTask(task.id)}
-                  style={{ width: "10%" }}
-                  icon={<PlusOutlined />}
-                />
+                <div className="flex space-x-2">
+                  <div className="flex self-center items-center">
+                    {getTaskStatus(task.status)}
+                  </div>
+                  <h1 className="text-xl font-semibold ">{task.title}</h1>
+                </div>
+                {task.status === TaskStatus.ACTIVE ? (
+                  <Button
+                    type="dashed"
+                    onClick={() => handleAddSubTask(task.id)}
+                    style={{ width: "10%" }}
+                    icon={<PlusOutlined />}
+                  />
+                ) : null}
               </div>
               {task.id === selectedTask && toggleSubTaskForm ? (
                 <Form
@@ -84,7 +120,12 @@ const TaskList: React.FC<ITaskList> = (props) => {
                   </Form.Item>
                 </Form>
               ) : null}
-              <SubTaskList allSubTasks={task.sub_tasks} />
+              <SubTaskList
+                taskId={task.id}
+                taskStatus={task.status}
+                allSubTasks={task.sub_tasks}
+                handleSubTaskComplete={handleSubTaskComplete}
+              />
             </div>
           </div>
         );
@@ -94,15 +135,27 @@ const TaskList: React.FC<ITaskList> = (props) => {
 };
 
 interface ISubTaskList {
+  taskId: string;
+  taskStatus: TaskStatus;
   allSubTasks: SubTaskType[];
+  handleSubTaskComplete: (taskId: string, subTaskId: string) => void;
 }
 
-const SubTaskList: React.VFC<ISubTaskList> = ({ allSubTasks }) => {
+const SubTaskList: React.VFC<ISubTaskList> = ({
+  taskId,
+  taskStatus,
+  allSubTasks,
+  handleSubTaskComplete,
+}) => {
   return (
-    <div>
+    <div className="pl-5">
       {allSubTasks?.map((subTask) => (
-        <div className="flex space-x-5">
-          <Checkbox checked={subTask.isComplete} />
+        <div key={subTask.id} className="flex space-x-5">
+          <Checkbox
+            disabled={taskStatus === TaskStatus.COMPLETED ? true : false}
+            defaultChecked={subTask.isComplete}
+            onClick={() => handleSubTaskComplete(taskId, subTask.id)}
+          />
           <p className="text-md">{subTask.title}</p>
         </div>
       ))}
