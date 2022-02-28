@@ -6,9 +6,9 @@ To get started simply run `npm start` and it will open up your default browser a
 
 ## Demo
 
-```
-![Demo](./demo/crave-tech-fe-test.gif)
-```
+
+![Demo](./demo/crave-tech-fe-test-demo.gif)
+
 
 ## Live Demo
 
