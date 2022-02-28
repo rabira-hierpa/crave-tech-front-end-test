@@ -3,7 +3,7 @@ import TaskInput from "../components/TaskInput";
 import TaskList from "../components/TaskList";
 import { TaskContext } from "../store/task-context";
 
-const AlertMessage: React.FC = () => {
+const AlertMessage:React.FC = () => {
   const { allTasksCompleted } = useContext(TaskContext);
   const [alertMessage, setAlertMessage] = useState<any>({});
 
@@ -18,7 +18,9 @@ const AlertMessage: React.FC = () => {
     setAlertMessage(response);
   };
   useEffect(() => {
-    getFact();
+    if (allTasksCompleted) {
+      getFact();
+    }
   }, [allTasksCompleted]);
 
   return (
@@ -38,6 +40,7 @@ const AlertMessage: React.FC = () => {
 const HomePage = () => {
   const { allTasks, addTask, setInitialState } = useContext(TaskContext);
 
+  //TODO: add a loading state until the initial state is written to localStorage
   useEffect(() => {
     const savedList = window.localStorage.getItem("taskList");
     if (!savedList) {
@@ -71,7 +74,7 @@ const HomePage = () => {
 
 const Header: React.VFC = () => {
   return (
-    <nav className="bg-yellow-400 py-2 shadow-md">
+    <nav id="navHeader" className="bg-yellow-400 py-2 shadow-md">
       <h1 className="text-center text-3xl font-bold">
         Startup Progress Tracker
       </h1>

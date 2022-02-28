@@ -1,10 +1,10 @@
-import React from 'react';
-import { render, screen } from '@testing-library/react';
-import App from './App';
+import React from "react";
+import { render, screen } from "@testing-library/react";
+import HomePage from "./containers/HomePage";
 
-test('renders learn react link', () => {
-  render(<App />);
-  const linkElement = screen.getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
-});
 // TODO: write tests for adding tasks, adding subtasks, unlocking next stage and checking all subtasks complete
+
+test("check if homepage is rendered", () => {
+  render(<HomePage />);
+  expect(screen.getByText(/Startup Progress Tracker/i)).toBeInTheDocument();
+});
