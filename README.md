@@ -4,6 +4,10 @@ This project was bootstrapped with [R.A.T](https://github.com/rabira-hierpa/rat)
 
 To get started simply run `npm start` and it will open up your default browser at [http://localhost:3000](http://localhost:3000)
 
+## Demo
+
+You can preview the app at [https://startup-crave.netlify.app/](https://startup-crave.netlify.app/)
+
 ## Available Scripts
 
 In the project directory, you can run:
